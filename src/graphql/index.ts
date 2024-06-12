@@ -1,14 +1,14 @@
 import { ApolloServer } from "@apollo/server";
-import { User } from "../user";
+import { User } from "./user";
 
 async function createApolloServer() {
     const server = new ApolloServer({
             typeDefs : `
                 type Query {
-                    hello: String
+                    ${User.queries}
                 }
                 type Mutation {
-                    createUser(firstName: String!, lastName: String!, email: String!, password: String!, profileImageURl: String!): String
+                    ${User.mutations}
                 }
         `,
             resolvers : {
@@ -16,10 +16,7 @@ async function createApolloServer() {
                     ...User.resolvers.queries
                 },
                 Mutation : {
-                    createUser :
-                        (_ : any, {}: {}) => {
-                            return "hello there";
-                        }
+                    ...User.resolvers.mutations
                 }
             },
         });

@@ -5,9 +5,9 @@ export const queries = {
 }
 
 export const mutations = {
-    createUser: async (_: any, {}: {}) => {
-        return "hello";
-    }
+    createUser : (_ : any, {}: {}) => {
+            return "hello there";
+        }
     // createUser: async (_: any, { firstName, lastName, email, password, profileImageURl }: { firstName: string; lastName: string; email: string; password: string; profileImageURl: string }) => {
         // try {
         //     await prisma.user.create({
