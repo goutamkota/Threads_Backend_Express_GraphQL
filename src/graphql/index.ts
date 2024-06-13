@@ -3,23 +3,23 @@ import { User } from "./user";
 
 async function createApolloServer() {
     const server = new ApolloServer({
-            typeDefs : `
-                type Query {
-                    ${User.queries}
-                }
-                type Mutation {
-                    ${User.mutations}
-                }
+        typeDefs : `
+            type Query {
+                 ${User.queries}
+            }
+            type Mutation {
+                 ${User.mutations}
+            }
         `,
-            resolvers : {
-                Query : {
-                    ...User.resolvers.queries
-                },
-                Mutation : {
-                    ...User.resolvers.mutations
-                }
+        resolvers : {
+            Query : {
+                ...User.resolvers.queries
             },
-        });
+            Mutation : {
+                ...User.resolvers.mutations
+            }
+        },
+    });
 
     await server.start();
 
