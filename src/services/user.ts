@@ -1,8 +1,9 @@
 import { prisma } from "../lib/db";
 import { createHmac, randomBytes } from "node:crypto";
-import { sign } from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken";
+import { User } from "@prisma/client";
 
-const JWT_SECRET  =  'hjvkvdbvhsacvuz';
+const JWT_SECRET = 'hjvkvdbvhsacvuz';
 
 export interface CreateUserPayload {
     firstName : string;
@@ -23,14 +24,23 @@ export default class UserService {
         })
     }
 
-    private static generateHash(salt: string, password: string): string {
+    private static generateHash(salt : string, password : string) : string {
         return createHmac('sha256', salt).update(password).digest('hex');
+    }
+
+    public static decodeJWTToken(token : string | undefined) : string {
+        if (!token) throw new Error('Token not provided');
+        return verify(token, JWT_SECRET) as string;
+    }
+
+    public static async getUserById(id : string) {
+        return prisma.user.findUnique({ where : { id } });
     }
 
     public static createUser(payload : CreateUserPayload) {
         const { firstName, lastName, email, password } = payload;
         const salt = randomBytes(32).toString("hex");
-        const hashedPassword = this.generateHash(salt,password);
+        const hashedPassword = this.generateHash(salt, password);
         return prisma.user.create({
             data : {
                 firstName,
@@ -45,9 +55,9 @@ export default class UserService {
     public static async getUserToken(payload : GetUserTokenPayload) {
         const { email, password } = payload;
         const user = await this.getUserByEmail(email);
-        if(!user) throw new Error('User not found!');
-        const userHashedPassword = this.generateHash(user.salt,password);
-        if(userHashedPassword !== user.password) throw new Error('Invalid password!');
+        if (!user) throw new Error('User not found!');
+        const userHashedPassword = this.generateHash(user.salt, password);
+        if (userHashedPassword !== user.password) throw new Error('Invalid password!');
         return sign({ id : user.id, email : user.email }, JWT_SECRET)
     }
 }

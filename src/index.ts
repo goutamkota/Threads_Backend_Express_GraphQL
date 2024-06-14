@@ -2,12 +2,13 @@ import express, { Express } from 'express';
 import { expressMiddleware } from "@apollo/server/express4";
 import createApolloServer from "./graphql";
 import cors from 'cors';
+import UserService from "./services/user";
 
 const corsOptions = {
-    origin: ['https://studio.apollographql.com', 'http://localhost:3000'],
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    origin : ['https://studio.apollographql.com', 'http://localhost:3000'],
+    methods : ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders : ['Content-Type', 'Authorization'],
+    credentials : true,
 };
 
 
@@ -24,7 +25,18 @@ async function init() {
         return res.status(200).json({ message : `Hello ${name}!` });
     });
 
-    app.use('/graphql', expressMiddleware(await createApolloServer()))
+    app.use('/graphql', expressMiddleware(await createApolloServer(), {
+        context : async ({ req }) => {
+            const token = req.headers['token'];
+            try {
+                //@ts-ignore
+                const user = UserService.decodeJWTToken(token);
+                return { user}
+            } catch (e){
+                return {}
+            }
+        }
+    }))
 
     app.listen(port, () => console.log(`Server running on port ${port}`));
 }
